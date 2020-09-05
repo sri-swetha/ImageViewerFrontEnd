@@ -1,0 +1,31 @@
+.header{
+    text-align: left;
+    font-size: 18px;
+    padding: 20px; 
+    background:#263238; 
+    color: #fff;
+    
+}
+  .loginCard{
+      display:flex;
+      flex-direction: row;
+      justify-content: center;
+      width:100%;
+  }
+  #loginText{
+   font-size:x-large;
+   font-weight:500;
+  }
+  .dispNone{
+    display:none;
+}
+.red
+{
+    color: red;
+}
+.dispBlock {
+    display: block;
+}
+#card{
+    width:40%;
+}
