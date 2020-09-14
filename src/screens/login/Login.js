@@ -42,6 +42,8 @@ class Login extends Component{
     
       }
     loginHandler = event => {
+        sessionStorage.setItem('access-token'," ");
+        console.log("session storage"+sessionStorage.getItem('access-token'));
         this.state.userName===""?this.setState({userNameRequired:"dispBlock"}):this.setState({userNameRequired:"dispNone"});
         this.state.password===""?this.setState({passwordRequired:"dispBlock"}):this.setState({passwordRequired:"dispNone"});
         if((this.state.userName===this.state.reqUserName)&&(this.state.password===this.state.reqPass))
