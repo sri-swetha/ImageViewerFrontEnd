@@ -22,6 +22,9 @@ import IconButton from '@material-ui/core/IconButton';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import '../../common/common.css';
 import { TextField } from '@material-ui/core';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import {RichText, Date} from 'prismic-reactjs';
+import moment from 'moment'
 const styles = theme => ({
   
     inputRoot: {
@@ -61,6 +64,9 @@ const styles = theme => ({
     },
     commentwidth: {
         width: '45ch'
+    },
+    favIcon: {
+        color: 'red'
     }
 })
 class Home extends Component {
@@ -71,7 +77,8 @@ class Home extends Component {
             uploadedImages: [], 
             allImages: [{}],
             like:0,
-            likedImages:[]
+            likedImages:[],
+            commentGlobal: ""
         }
         this.value=true;
         this.imageDetailHandler=this.imageDetailHandler.bind(this);
@@ -91,7 +98,7 @@ class Home extends Component {
             }
         })
 
-        xhrimgUpcoming.open("GET", "https://graph.instagram.com/me/media?fields=id,caption&access_token=IGQVJVZA0pDN3FPeHVRdy1WYVdsYTQ1U1V5ZA2lsa2dEVk1HRTdNNFZADdEV6cHMwN01qTDFUOGkzR2RXS2RlcHJSb2ptS2llV3phN0tlbHNJRE1FbTg1NDNaZAnY3aDBUeVVJczg3WXo4UXpsTWFuQnRzb1pKbkFia0ZAOMGlZA");
+        xhrimgUpcoming.open("GET", "https://graph.instagram.com/me/media?fields=id,caption&access_token=IGQVJWek9PamF0YndPcGxmV0YyR3c1T2tQUDNxQ3JraFFBOEpXZAjRCa1pmRE0tdEdGNEt6MURTbnA1VUpLdkpFUmtZAV201cDN5TmJza1JzWHN5SUZA0ZA3dKNlRQV2NENXB3MnlBUXphUDRBWlFtZAzJZAaWNfN2EzSUgzbmxj");
         xhrimgUpcoming.setRequestHeader("Cache-Control", "no-cache");
         xhrimgUpcoming.send(imgUpcoming);  
     }
@@ -118,7 +125,7 @@ class Home extends Component {
                 }
             })
     
-            xhrUpcoming.open("GET", "https://graph.instagram.com/"+id+"?fields=id,media_type,media_url,username,timestamp&access_token=IGQVJVZA0pDN3FPeHVRdy1WYVdsYTQ1U1V5ZA2lsa2dEVk1HRTdNNFZADdEV6cHMwN01qTDFUOGkzR2RXS2RlcHJSb2ptS2llV3phN0tlbHNJRE1FbTg1NDNaZAnY3aDBUeVVJczg3WXo4UXpsTWFuQnRzb1pKbkFia0ZAOMGlZA");
+            xhrUpcoming.open("GET", "https://graph.instagram.com/"+id+"?fields=id,media_type,media_url,username,timestamp&access_token=IGQVJWek9PamF0YndPcGxmV0YyR3c1T2tQUDNxQ3JraFFBOEpXZAjRCa1pmRE0tdEdGNEt6MURTbnA1VUpLdkpFUmtZAV201cDN5TmJza1JzWHN5SUZA0ZA3dKNlRQV2NENXB3MnlBUXphUDRBWlFtZAzJZAaWNfN2EzSUgzbmxj");
             xhrUpcoming.setRequestHeader("Cache-Control", "no-cache");
             xhrUpcoming.send(dataUpcoming); 
             console.log("Uploaded Images "+that.state.uploadedImages);  
@@ -141,29 +148,56 @@ class Home extends Component {
             caption=this.state.allImages[i].caption;           
             index=caption.indexOf("#");
             e.caption = caption.substr(0,index);
-            e.hashtags=caption.substr(index).replaceAll("#"," #").replace(" #","#");           
+            e.hashtags=caption.substr(index).replaceAll("#"," #").replace(" #","#"); 
+            e.comment="";          
             return e;
         });
         this.setState({ uploadedImages: data });
-        this.setState({ likedImages: data });
         //console.log("data ",this.state.uploadedImages[0].caption);
     }
 
     likeHandler =(img)=>{
-        let index=0;
-        console.log("Image Obj ",img);
+        let index=this.state.uploadedImages.findIndex((c) => (
+            c.id === img.id
+        ));
+        let newArray=[...this.state.uploadedImages];
+        newArray[index]={...newArray[index], like: newArray[index].like+1};
+        this.setState({uploadedImages: newArray,})
+/*         console.log("Image Obj ",img);
         console.log("LikeImages ",this.state.likedImages);
+        let imgLike= this.state.likedImages[index].like;
         let data = this.state.likedImages.filter((img) => {
             index=this.state.likedImages.findIndex((c) => (
                 c.id === img.id
             ));
-            this.state.likedImages[index].like+=1;
+            imgLike= this.state.likedImages[index].like;
+            imgLike+=1;
+            img.like=imgLike;
+            return imgLike;
+        }); 
+        this.setState({likedImages : data}); */
+/*         console.log("Like ", this.state.likedImages); 
+        let currImg=this.state.likedImages[index];
+        this.setState({uploadedImages: this.state.likedImages}); */
+    }
 
-            return this.state.likedImages[index].like;
-        });
+    onCommentChangeHandler = event =>{
+        console.log("Event ",event.target.value);
+        this.setState({commentGlobal: event.target.value});
+        console.log("On Change "+this.state.commentGlobal);
+    }
 
-        this.setState({likedImages : data});
-        console.log("Like ", this.state.likedImages); 
+    commentHandler =(img)=>{
+        let addComment=this.state.commentGlobal;
+        let index=this.state.uploadedImages.findIndex((c) => (
+            c.id === img.id
+        ));
+        let newArray=[...this.state.uploadedImages];
+        newArray[index]={...newArray[index], comment: newArray[index].comment+addComment};
+        this.setState({uploadedImages: newArray,})
+        this.setState({commentGlobal: "",});
+        console.log("Comment Global ",this.state.commentGlobal);
+        console.log("Comments ",this.state.uploadedImages);
     }
     
    
@@ -207,7 +241,8 @@ class Home extends Component {
                             }
 
                             title={img.username}
-                            subheader={new Date(img.timestamp).toDateString()}
+                            subheader={moment(Date(img.timestamp)).format('L HH:mm:ss')}
+                         
                         />                   
                         <CardContent>
                             <CardMedia
@@ -223,14 +258,28 @@ class Home extends Component {
                             </Typography>
                         </CardContent>
                         <CardActions disableSpacing>
-                            <IconButton aria-label="add to favorites" onClick={()=>this.likeHandler(img)}>
-                                <FavoriteBorderIcon />
-                              {img.like}  Likes
-                            </IconButton>
+                             {
+                             img.like>0 ?
+                             <div>
+                            <IconButton aria-label="add to favorites" onClick={()=>this.likeHandler(img)}><FavoriteIcon className={classes.favIcon} /></IconButton>
+                              <span> {img.like} Likes </span> </div>:
+                              <div>
+                            <IconButton aria-label="add to favorites" onClick={()=>this.likeHandler(img)}><FavoriteBorderIcon /></IconButton>
+                            </div>
+                            }
                         </CardActions>
                         <CardContent>
-                            <TextField  className={classes.commentwidth} label="Add a Comment" placeholder="Add a Comment" multiline/>
-                            <Button id="addbtn" variant="contained" color="primary" >ADD</Button>
+                             {
+                                img.comment !=="" ? 
+                                
+                                <Typography variant="body2" color="textPrimary" component="h2" id="addcomment">
+                               {img.username}:{img.comment}
+                                </Typography> : img.comment
+                                
+                            }
+
+                            <TextField onChange={this.onCommentChangeHandler} className={classes.commentwidth} label="Add a Comment" placeholder="Add a Comment" multiline/>
+                            <Button id="addbtn" onClick={()=>this.commentHandler(img)} variant="contained" color="primary" >ADD</Button>
                         </CardContent>
                     </Card>  
                     ))}
