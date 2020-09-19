@@ -2,10 +2,37 @@
     float:right;
     padding-left:10px;
 }
-#card2{
-    width:40%;
+#cardDiv{
+    padding-left: 270px;
 }
 #addbtn{
     float: right;
     margin-top:3%;
 }
+#addcomment{
+    margin-bottom:2%;
+}
+#username{
+    font-weight: bold;
+}
+
+#gridList{
+    margin-bottom:10%;
+}
+::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: grey;
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: grey;
+  }
