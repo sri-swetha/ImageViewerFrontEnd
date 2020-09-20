@@ -1,0 +1,60 @@
+.profile{
+    float:right;
+    padding-left:10px;
+}
+#cardDiv{
+    padding-left: 270px;
+}
+#addbtn{
+    float: right;
+    margin-top:3%;
+}
+#addcomment{
+    margin-bottom:2%;
+}
+#username{
+    font-weight: bold;
+}
+
+
+::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: grey;
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: grey;
+  }
+
+
+  .profile-detail .MuiAvatar-circle {
+    width: 150px;
+    height: 150px;
+}
+
+.image-grid {
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 2%;
+}

@@ -28,6 +28,8 @@ import moment from 'moment';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
+import PostLikes from '../../common/post/PostLikes';
+
 const styles = theme => ({
 
     inputRoot: {
@@ -92,7 +94,9 @@ class Home extends Component {
             allImages: [{}],
             like: 0,
             likedImages: [],
-            commentGlobal: ""
+            commentGlobal: "",
+            profileClick: 0,
+            message: "Enterd to Profile"
         }
         this.value = true;
         this.imageDetailHandler = this.imageDetailHandler.bind(this);
@@ -112,7 +116,7 @@ class Home extends Component {
             }
         })
 
-        xhrimgUpcoming.open("GET", "https://graph.instagram.com/me/media?fields=id,caption&access_token=IGQVJWaHQtM3BfU3hlcnM2alI0LUdWWjJRT2JybkJfcG1ZAZA2ZAuS014OURucTFFc0N0N05vbFl2U1AzSVJFSDFhNGZA3UEgyYklOQ1M3dXNiY0pnZAUI0clltZAno1WGVpMk1PVG9lbkJMN0U0azB6WlhtQzVVZAzM4NnhVVjEw");
+        xhrimgUpcoming.open("GET", "https://graph.instagram.com/me/media?fields=id,caption&access_token=IGQVJWVm5kSEh4N0tDYlFtREZAoQVo5d3ZAPOGdwRWx5NjZAMVllucU9XMVFWTU40a19SeHVmbnZARZA3V5RzlpWWpCLW1Bc3dLb2l3TDdHSENsNGNkZAjhpUnoxQVVlQmRvLUtSWG9JLWgwQ0FrcllJMW9UOTJTaEJoTlE3WDhN");
         xhrimgUpcoming.setRequestHeader("Cache-Control", "no-cache");
         xhrimgUpcoming.send(imgUpcoming);
     }
@@ -139,7 +143,7 @@ class Home extends Component {
                 }
             })
 
-            xhrUpcoming.open("GET", "https://graph.instagram.com/" + id + "?fields=id,media_type,media_url,username,timestamp&access_token=IGQVJWaHQtM3BfU3hlcnM2alI0LUdWWjJRT2JybkJfcG1ZAZA2ZAuS014OURucTFFc0N0N05vbFl2U1AzSVJFSDFhNGZA3UEgyYklOQ1M3dXNiY0pnZAUI0clltZAno1WGVpMk1PVG9lbkJMN0U0azB6WlhtQzVVZAzM4NnhVVjEw");
+            xhrUpcoming.open("GET", "https://graph.instagram.com/" + id + "?fields=id,media_type,media_url,username,timestamp&access_token=IGQVJWVm5kSEh4N0tDYlFtREZAoQVo5d3ZAPOGdwRWx5NjZAMVllucU9XMVFWTU40a19SeHVmbnZARZA3V5RzlpWWpCLW1Bc3dLb2l3TDdHSENsNGNkZAjhpUnoxQVVlQmRvLUtSWG9JLWgwQ0FrcllJMW9UOTJTaEJoTlE3WDhN");
             xhrUpcoming.setRequestHeader("Cache-Control", "no-cache");
             xhrUpcoming.send(dataUpcoming);
             console.log("Uploaded Images " + that.state.uploadedImages);
@@ -213,6 +217,10 @@ class Home extends Component {
         console.log("Comment Global ", this.state.commentGlobal);
         console.log("Comments ", this.state.uploadedImages);
     }
+    profileClickHandler = ()=>{
+        this.state.profileClick=1;
+        this.props.history.push("/profile");
+    }
 
 
     render() {
@@ -222,7 +230,8 @@ class Home extends Component {
                 <header className="header">
                     Image Viewer
                         <div className="profile">
-                        <Avatar src="https://i.pinimg.com/564x/09/5d/31/095d317d5d2d0918aacebc4537199233.jpg" />
+                        <Avatar src="https://i.pinimg.com/564x/09/5d/31/095d317d5d2d0918aacebc4537199233.jpg"
+                         onClick={this.profileClickHandler} />
                     </div>
                     <div className={classes.search} >
                         <div className={classes.searchIcon}>
@@ -306,8 +315,6 @@ class Home extends Component {
                         </GridList>
                     ))}
                 </div>
-
-
 
             </div>
         )
