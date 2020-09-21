@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './Home.css';
+import './profile.css';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import FormControl from '@material-ui/core/FormControl';
@@ -28,7 +28,13 @@ import moment from 'moment';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
+import ProfileDetails from './ProfileDetails';
+import { Box, Modal, Backdrop, Fade } from '@material-ui/core';
+import PostHeader from '../../common/post/PostHeader';
+import PostMedia from '../../common/post/PostMedia';
+import PostCaption from '../../common/post/PostCaption';
 import PostLikes from '../../common/post/PostLikes';
+import PostComments from '../../common/post/PostComments';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ProfileImage from '../../assets/profile-pic.jpg';
@@ -86,21 +92,45 @@ const styles = theme => ({
         transform: 'translateZ(0)',
         padding: "15px"
     },
+
+
+    imageContainer: {
+        marginLeft: 0,
+        paddingBottom: '1%',
+        height: '100%',
+        width: '100%'
+    },
+    header: {
+        /*margin: 'auto',*/
+        width: '100%',
+        marginLeft: '0',
+        paddingTop: '1%',
+        paddingRight: '1%',
+        paddingBottom: '1%'
+    },
+    textStrong: {
+        fontWeight: 750
+    },
+    textLite: {
+        fontWeight: 500
+    },
     bg: {
 
         backgroundColor: '#b3b3b3 !important',
         color: 'black !important',
         padding: '10px',
         borderRadius: '10px',
-        height: '90px'
+        height: '30px'
     },
     userAvatar: {
         border: 0,
         padding: 0,
         margin: 0
     }
+
+
 })
-class Home extends Component {
+class Profile extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -111,14 +141,12 @@ class Home extends Component {
             likedImages: [],
             commentGlobal: "",
             profileClick: 0,
-            message: "Enterd to Profile",
-            searchPattern: "",
-            searchImages: [],
+            message: "",
+            img: {},
             anchorEl: null,
         }
         this.value = true;
         this.imageDetailHandler = this.imageDetailHandler.bind(this);
-        this.filterImg = this.filterImg.bind(this);
         this.allImagesHandler = this.allImagesHandler.bind(this);
     }
 
@@ -160,6 +188,7 @@ class Home extends Component {
             xhrUpcoming.addEventListener("readystatechange", function () {
                 if (this.readyState === 4) {
                     that.setState({ uploadedImages: that.state.uploadedImages.concat(JSON.parse(this.responseText)) });
+                    that.setState({ message: that.state.uploadedImages[0].username });
                 }
             })
 
@@ -167,14 +196,12 @@ class Home extends Component {
             xhrUpcoming.setRequestHeader("Cache-Control", "no-cache");
             xhrUpcoming.send(dataUpcoming);
             console.log("Uploaded Images " + that.state.uploadedImages);
+
         }
-        this.allImagesHandler();
-        setTimeout(this.allImagesHandler, 5000);
     }
 
-    allImagesHandler = () => {
-        console.log("All Img Details ", this.state.uploadedImages);
-
+    allImagesHandler = (event) => {
+        console.log("Message ", this.state.message);
         let i = 0;
         let caption = "";
         let index = "";
@@ -193,8 +220,7 @@ class Home extends Component {
             return e;
         });
         this.setState({ uploadedImages: data });
-        this.setState({ searchImages: data });
-        //console.log("All Img Details after", this.state.uploadedImages);
+        //console.log("username ",username);
     }
 
     likeHandler = (img) => {
@@ -203,20 +229,8 @@ class Home extends Component {
         ));
         let newArray = [...this.state.uploadedImages];
         newArray[index] = { ...newArray[index], like: newArray[index].like + 1 };
-        this.setState({ uploadedImages: newArray, });
-        this.setState({ searchImages: newArray, })
+        this.setState({ uploadedImages: newArray, })
     }
-
-    unlikeHandler = (img) => {
-        let index = this.state.uploadedImages.findIndex((c) => (
-            c.id === img.id
-        ));
-        let newArray = [...this.state.uploadedImages];
-        newArray[index] = { ...newArray[index], like: newArray[index].like - 1 };
-        this.setState({ uploadedImages: newArray, });
-        this.setState({ searchImages: newArray, })
-    }
-
 
     onCommentChangeHandler = event => {
         console.log("Event ", event.target.value);
@@ -231,35 +245,19 @@ class Home extends Component {
         ));
         let newArray = [...this.state.uploadedImages];
         newArray[index] = { ...newArray[index], comment: newArray[index].comment + addComment };
-        this.setState({ uploadedImages: newArray, });
-        this.setState({ searchImages: newArray, })
+        this.setState({ uploadedImages: newArray, })
         this.setState({ commentGlobal: "", });
         console.log("Comment Global ", this.state.commentGlobal);
         console.log("Comments ", this.state.uploadedImages);
-
-    }
-    profileClickHandler = () => {
-        this.state.profileClick = 1;
-        this.props.history.push("/profile");
     }
 
-    // Handler method to filter posts on change in Search Text
-    filterImg = (e) => {
-        console.log("Search ", this.state.searchImages);
+    openImgDetails = (e) => {
+        this.setState({ open: true, img: this.state.uploadedImages.find((img) => img.id === e.target.id) });
+    }
 
-        if (e.target.value === "") {
-            this.setState({ uploadedImages: this.state.searchImages });
-        }
-        else {
-            this.setState({
-                searchPattern: e.target.value, uploadedImages: this.state.searchImages.filter(
-                    (img) => img.caption.includes(e.target.value)
-                )
-            });
-        }
-        console.log("Uploaded Images ", this.state.uploadedImages);
-        console.log("Search Images ", this.state.searchImages);
-
+    // Handler to close post modal
+    closePostDetails = (e) => {
+        this.setState({ open: false, img: {} });
     }
 
     handleClick = (event) => {
@@ -274,16 +272,17 @@ class Home extends Component {
     LogoutHandler = () => {
         sessionStorage.clear();
         this.props.history.push("/");
-
     }
-
+    homePageHandler = () => {
+        this.props.history.push("/home");
+    }
 
     render() {
         const { classes } = this.props;
         return (
             <div>
                 <header className="header">
-                    Image Viewer
+                    <span onClick={this.homePageHandler}>Image Viewer</span>
                     <div className="profile">
                         <IconButton className={classes.userAvatar} onClick={this.handleClick}>
                             <Avatar alt="AS" src={ProfileImage} />
@@ -307,102 +306,61 @@ class Home extends Component {
                             open={Boolean(this.state.anchorEl)}
                             onClose={this.handleClose}>
                             <div className={classes.bg}>
-                                <div> <MenuItem onClose={this.handleClose} onClick={this.profileClickHandler}>
-                                    My Account
-                                   </MenuItem><hr /> </div>
 
                                 <MenuItem onClose={this.handleClose} onClick={this.LogoutHandler}>
-                                    Logout
+                                    LogOut
                                 </MenuItem>
                             </div>
                         </Menu>
                     </div>
-                    <div className={classes.search} >
-                        <div className={classes.searchIcon}>
 
-                            <SearchIcon />
-                        </div>
-                        <InputBase className={classes.inputBase}
-                            placeholder="Search…"
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            inputProps={{ 'aria-label': 'search' }}
-                            onChange={this.filterImg}
-                        />
-                    </div>
+
+
                 </header>
-                {/*                 <div>
-                    <Button onClick={this.allImagesHandler}>Click Me</Button>
-                </div> */}
 
-                <div className={classes.root1} id="cardDiv" >
+                {
+                    (this.state.uploadedImages.length > 0) ?
+                        <div onLoad={this.allImagesHandler}>
 
-                    {this.state.uploadedImages.map(img => (
-                        <GridList cellHeight={500} className={classes.gridList}>
-                            <GridListTile key={img.id} cols={2} >
-                                <Card key={img.id} variant="outlined">
-                                    <CardHeader
-                                        avatar={
-                                            <Avatar src="https://i.pinimg.com/564x/09/5d/31/095d317d5d2d0918aacebc4537199233.jpg" />
+                            <Box><ProfileDetails className="profile-detail" userName={this.state.message} numPosts={this.state.uploadedImages.length}
+                                fullName="Sri Swetha" follows={Math.round(500 + Math.random() * 500)}
+                                followers={Math.round(1000 + Math.random() * 1000)} />
+                                < Box className="image-grid">
+                                    <GridList cellHeight={300} cols={3}>
+                                        {this.state.uploadedImages.map((img) => (
+                                            <GridListTile key={img.id} >
+                                                <img id={img.id} src={img.media_url} alt={img.id} onClick={this.openImgDetails} />
+                                            </GridListTile>
+                                        ))}
+                                    </GridList>
+                                </Box>
 
-                                        }
 
-                                        title={img.username}
-                                        subheader={moment(Date(img.timestamp)).format('L HH:mm:ss')}
+                                <Modal className="modal" open={this.state.open}
+                                    onClose={this.closePostDetails} closeAfterTransition BackdropComponent={Backdrop}>
+                                    <Fade in={this.state.open}>
+                                        <Box width="60%" display="flex" flexDirection="row" justifyContent="space-evenly" className="modal-content">
+                                            <Box m="1%" width="50%" className="image-container" >
+                                                {(this.state.img.media_url) ? <PostMedia media={this.state.img.media_url} mediaId={this.state.img.id} minWidth="350px" minHeight="350px" /> : ""}
+                                            </Box>
+                                            <Box m="2%" width="50%" display="flex" flexDirection="column" justifyContent="left" alignItems="center">
+                                                <PostHeader postUser={this.state.img.username} postedTime={this.state.img.timestamp} />
+                                                <PostCaption mb="auto" caption={this.state.img.caption} hashtags={this.state.img.hashtags} />
+                                                <Box mt="auto" width="100%">
+                                                    <PostComments postUser={this.state.img.username} >
+                                                        <PostLikes likes={this.state.img.like} />
+                                                    </PostComments>
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    </Fade>
+                                </Modal>
+                            </Box>
 
-                                    />
-                                    <CardContent>
-                                        <CardMedia
-                                            className={classes.media}
-                                            image={img.media_url}
-                                            title={img.caption}
-                                        />
-                                        <Typography variant="body2" color="textPrimary" component="h1">
-                                            {img.caption}
-                                        </Typography>
-                                        <Typography variant="body2" color="primary" component="h2">
-                                            {img.hashtags}
-                                        </Typography>
-                                    </CardContent>
-                                    <CardActions disableSpacing>
-                                        {
-                                            img.like > 0 ?
-                                                <div>
-                                                    <IconButton aria-label="add to favorites" onClick={() => this.unlikeHandler(img)}><FavoriteIcon className={classes.favIcon} /></IconButton>
-                                                    <span> {img.like} Likes </span> </div> :
-                                                <div>
-                                                    <IconButton aria-label="add to favorites" onClick={() => this.likeHandler(img)}><FavoriteBorderIcon /></IconButton>
-                                                </div>
-                                        }
-                                    </CardActions>
-                                    <CardContent>
-                                        {
-                                            img.comment !== "" ?
-
-                                                <Typography variant="body2" color="textPrimary" component="h2" id="addcomment">
-                                                    <span id="username">{img.username} </span>:{img.comment}
-                                                </Typography> : img.comment
-
-                                        }
-                                        {
-                                            this.state.commentGlobal === "" ?
-                                                <TextField onChange={this.onCommentChangeHandler} className={classes.commentwidth} label="Add a Comment" placeholder="Add a Comment" value={this.state.commentGlobal} multiline />
-                                                :
-                                                <TextField onChange={this.onCommentChangeHandler} className={classes.commentwidth} label="Add a Comment" placeholder="Add a Comment" multiline />
-
-                                        }
-                                        <Button id="addbtn" onClick={() => this.commentHandler(img)} variant="contained" color="primary" >ADD</Button>
-                                    </CardContent>
-                                </Card>
-                            </GridListTile>
-                        </GridList>
-                    ))}
-                </div>
-
+                        </div> : ""
+                }
             </div>
         )
     }
 }
-export default withStyles(styles)(Home);
+export default withStyles(styles)(Profile);
