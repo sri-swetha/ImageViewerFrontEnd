@@ -100,6 +100,8 @@ const styles = theme => ({
         margin: 0
     }
 })
+
+//Home Component
 class Home extends Component {
     constructor(props) {
         super(props);
@@ -340,7 +342,7 @@ class Home extends Component {
                 <div className={classes.root1} id="cardDiv" >
 
                     {this.state.uploadedImages.map(img => (
-                        <GridList cellHeight={500} className={classes.gridList}>
+                        <GridList key={img.id} cellHeight={500} className={classes.gridList}>
                             <GridListTile key={img.id} cols={2} >
                                 <Card key={img.id} variant="outlined">
                                     <CardHeader

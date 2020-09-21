@@ -130,6 +130,9 @@ const styles = theme => ({
 
 
 })
+
+//Profile Component My Profile
+
 class Profile extends Component {
     constructor(props) {
         super(props);
@@ -144,6 +147,7 @@ class Profile extends Component {
             message: "",
             img: {},
             anchorEl: null,
+            open: false,
         }
         this.value = true;
         this.imageDetailHandler = this.imageDetailHandler.bind(this);

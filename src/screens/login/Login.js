@@ -23,14 +23,17 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import '../../common/common.css';
 const styles = theme => ({
     formControl: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         minWidth: 240
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         minWidth: 70
     }
 })
+
+//Login Component 
+
 class Login extends Component {
     constructor() {
         super();
@@ -45,41 +48,6 @@ class Login extends Component {
             loggedin: "false"
         }
     }
-
-
-    componentWillMount() {
-        //Get Uploaded Image of id
-        let dataUpcoming = null;
-        let xhrUpcoming = new XMLHttpRequest();
-        let that = this;
-        xhrUpcoming.addEventListener("readystatechange", function () {
-            if (this.readyState === 4) {
-                that.setState({ uploadedImages: JSON.parse(this.responseText) });
-            }
-        })
-
-        xhrUpcoming.open("GET", "https://graph.instagram.com/17927511802426913?fields=id,media_type,media_url,username,timestamp&access_token=IGQVJYWTVDNXgxUmRDb3ROcjMwN29IWTQ3Si1Vc3JJWDA3dUFLVDlPOVJodkFKNkdCTEtnNjBleFBJM0hTc2tmWmw3TkhSdU5JdXV3cjQwRTFyYlB4NWxqZADk3X3gyRXVSVlJaOXFZAczk4bVg1RFFMTDN1TXZAlOHVPSHZAz");
-        xhrUpcoming.setRequestHeader("Cache-Control", "no-cache");
-        xhrUpcoming.send(dataUpcoming);
-        console.log("Uploaded Images " + that.state.uploadedImages);
-
-        //Get All Uploaded Images
-        let imgUpcoming = null;
-        let xhrimgUpcoming = new XMLHttpRequest();
-        let thatimgUpcoming = this;
-        xhrimgUpcoming.addEventListener("readystatechange", function () {
-            if (this.readyState === 4) {
-                thatimgUpcoming.setState({ allImages: JSON.parse(this.responseText).data });              
-            }
-        })
-
-        xhrimgUpcoming.open("GET", "https://graph.instagram.com/me/media?fields=id,caption&access_token=IGQVJYWTVDNXgxUmRDb3ROcjMwN29IWTQ3Si1Vc3JJWDA3dUFLVDlPOVJodkFKNkdCTEtnNjBleFBJM0hTc2tmWmw3TkhSdU5JdXV3cjQwRTFyYlB4NWxqZADk3X3gyRXVSVlJaOXFZAczk4bVg1RFFMTDN1TXZAlOHVPSHZAz");
-        xhrimgUpcoming.setRequestHeader("Cache-Control", "no-cache");
-        xhrimgUpcoming.send(imgUpcoming);
-
-    }
-
-    
 
     userNameChangeHandler = event => {
         this.setState({ userName: event.target.value });
