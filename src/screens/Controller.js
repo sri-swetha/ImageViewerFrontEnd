@@ -9,7 +9,7 @@ class Controller extends Component {
   constructor()
   {
     super();
-    this.baseUrl = "http://18.212.74.66:8080/api/v1/";
+    this.baseUrl = "https://graph.instagram.com/";
   }
   render(){
     return(

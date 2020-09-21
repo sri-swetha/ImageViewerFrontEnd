@@ -29,7 +29,9 @@ import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import PostLikes from '../../common/post/PostLikes';
-
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ProfileImage from '../../assets/profile-pic.jpg';
 const styles = theme => ({
 
     inputRoot: {
@@ -83,6 +85,19 @@ const styles = theme => ({
         height: "40%",
         transform: 'translateZ(0)',
         padding: "15px"
+    },
+    bg: {
+
+        backgroundColor: '#b3b3b3 !important',
+        color: 'black !important',
+        padding: '10px',
+        borderRadius: '10px',
+        height: '90px'
+    },
+    userAvatar: {
+        border: 0,
+        padding: 0,
+        margin: 0
     }
 })
 class Home extends Component {
@@ -96,10 +111,15 @@ class Home extends Component {
             likedImages: [],
             commentGlobal: "",
             profileClick: 0,
-            message: "Enterd to Profile"
+            message: "Enterd to Profile",
+            searchPattern: "",
+            searchImages: [],
+            anchorEl: null,
         }
         this.value = true;
         this.imageDetailHandler = this.imageDetailHandler.bind(this);
+        this.filterImg = this.filterImg.bind(this);
+        this.allImagesHandler = this.allImagesHandler.bind(this);
     }
 
 
@@ -116,7 +136,7 @@ class Home extends Component {
             }
         })
 
-        xhrimgUpcoming.open("GET", "https://graph.instagram.com/me/media?fields=id,caption&access_token=IGQVJWVm5kSEh4N0tDYlFtREZAoQVo5d3ZAPOGdwRWx5NjZAMVllucU9XMVFWTU40a19SeHVmbnZARZA3V5RzlpWWpCLW1Bc3dLb2l3TDdHSENsNGNkZAjhpUnoxQVVlQmRvLUtSWG9JLWgwQ0FrcllJMW9UOTJTaEJoTlE3WDhN");
+        xhrimgUpcoming.open("GET", this.props.baseUrl + "me/media?fields=id,caption&access_token=" + sessionStorage.getItem("accessToken"));
         xhrimgUpcoming.setRequestHeader("Cache-Control", "no-cache");
         xhrimgUpcoming.send(imgUpcoming);
     }
@@ -143,14 +163,16 @@ class Home extends Component {
                 }
             })
 
-            xhrUpcoming.open("GET", "https://graph.instagram.com/" + id + "?fields=id,media_type,media_url,username,timestamp&access_token=IGQVJWVm5kSEh4N0tDYlFtREZAoQVo5d3ZAPOGdwRWx5NjZAMVllucU9XMVFWTU40a19SeHVmbnZARZA3V5RzlpWWpCLW1Bc3dLb2l3TDdHSENsNGNkZAjhpUnoxQVVlQmRvLUtSWG9JLWgwQ0FrcllJMW9UOTJTaEJoTlE3WDhN");
+            xhrUpcoming.open("GET", this.props.baseUrl + id + "?fields=id,media_type,media_url,username,timestamp&access_token=" + sessionStorage.getItem("accessToken"));
             xhrUpcoming.setRequestHeader("Cache-Control", "no-cache");
             xhrUpcoming.send(dataUpcoming);
             console.log("Uploaded Images " + that.state.uploadedImages);
         }
+        this.allImagesHandler();
+        setTimeout(this.allImagesHandler, 5000);
     }
 
-    allImagesHandler = (event) => {
+    allImagesHandler = () => {
         console.log("All Img Details ", this.state.uploadedImages);
 
         let i = 0;
@@ -171,7 +193,8 @@ class Home extends Component {
             return e;
         });
         this.setState({ uploadedImages: data });
-        //console.log("data ",this.state.uploadedImages[0].caption);
+        this.setState({ searchImages: data });
+        //console.log("All Img Details after", this.state.uploadedImages);
     }
 
     likeHandler = (img) => {
@@ -180,24 +203,20 @@ class Home extends Component {
         ));
         let newArray = [...this.state.uploadedImages];
         newArray[index] = { ...newArray[index], like: newArray[index].like + 1 };
-        this.setState({ uploadedImages: newArray, })
-        /*         console.log("Image Obj ",img);
-                console.log("LikeImages ",this.state.likedImages);
-                let imgLike= this.state.likedImages[index].like;
-                let data = this.state.likedImages.filter((img) => {
-                    index=this.state.likedImages.findIndex((c) => (
-                        c.id === img.id
-                    ));
-                    imgLike= this.state.likedImages[index].like;
-                    imgLike+=1;
-                    img.like=imgLike;
-                    return imgLike;
-                }); 
-                this.setState({likedImages : data}); */
-        /*         console.log("Like ", this.state.likedImages); 
-                let currImg=this.state.likedImages[index];
-                this.setState({uploadedImages: this.state.likedImages}); */
+        this.setState({ uploadedImages: newArray, });
+        this.setState({ searchImages: newArray, })
     }
+
+    unlikeHandler = (img) => {
+        let index = this.state.uploadedImages.findIndex((c) => (
+            c.id === img.id
+        ));
+        let newArray = [...this.state.uploadedImages];
+        newArray[index] = { ...newArray[index], like: newArray[index].like - 1 };
+        this.setState({ uploadedImages: newArray, });
+        this.setState({ searchImages: newArray, })
+    }
+
 
     onCommentChangeHandler = event => {
         console.log("Event ", event.target.value);
@@ -212,14 +231,50 @@ class Home extends Component {
         ));
         let newArray = [...this.state.uploadedImages];
         newArray[index] = { ...newArray[index], comment: newArray[index].comment + addComment };
-        this.setState({ uploadedImages: newArray, })
+        this.setState({ uploadedImages: newArray, });
+        this.setState({ searchImages: newArray, })
         this.setState({ commentGlobal: "", });
         console.log("Comment Global ", this.state.commentGlobal);
         console.log("Comments ", this.state.uploadedImages);
+
     }
-    profileClickHandler = ()=>{
-        this.state.profileClick=1;
+    profileClickHandler = () => {
+        this.state.profileClick = 1;
         this.props.history.push("/profile");
+    }
+
+    // Handler method to filter posts on change in Search Text
+    filterImg = (e) => {
+        console.log("Search ", this.state.searchImages);
+
+        if (e.target.value === "") {
+            this.setState({ uploadedImages: this.state.searchImages });
+        }
+        else {
+            this.setState({
+                searchPattern: e.target.value, uploadedImages: this.state.searchImages.filter(
+                    (img) => img.caption.includes(e.target.value)
+                )
+            });
+        }
+        console.log("Uploaded Images ", this.state.uploadedImages);
+        console.log("Search Images ", this.state.searchImages);
+
+    }
+
+    handleClick = (event) => {
+        this.setState({ anchorEl: event.currentTarget });
+
+    };
+
+    handleClose = () => {
+        this.setState({ anchorEl: null });
+    };
+
+    LogoutHandler = () => {
+        sessionStorage.clear();
+        this.props.history.push("/");
+
     }
 
 
@@ -229,9 +284,38 @@ class Home extends Component {
             <div>
                 <header className="header">
                     Image Viewer
-                        <div className="profile">
-                        <Avatar src="https://i.pinimg.com/564x/09/5d/31/095d317d5d2d0918aacebc4537199233.jpg"
-                         onClick={this.profileClickHandler} />
+                    <div className="profile">
+                        <IconButton className={classes.userAvatar} onClick={this.handleClick}>
+                            <Avatar alt="AS" src={ProfileImage} />
+                        </IconButton>
+
+                        <Menu
+                            className="simple-menu"
+                            elevation={0}
+                            getContentAnchorEl={null}
+                            anchorEl={this.state.anchorEl}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'center',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'center',
+                            }}
+
+                            keepMounted
+                            open={Boolean(this.state.anchorEl)}
+                            onClose={this.handleClose}>
+                            <div className={classes.bg}>
+                                <div> <MenuItem onClose={this.handleClose} onClick={this.profileClickHandler}>
+                                    My Account
+                                   </MenuItem><hr /> </div>
+
+                                <MenuItem onClose={this.handleClose} onClick={this.LogoutHandler}>
+                                    Logout
+                                </MenuItem>
+                            </div>
+                        </Menu>
                     </div>
                     <div className={classes.search} >
                         <div className={classes.searchIcon}>
@@ -245,6 +329,7 @@ class Home extends Component {
                                 input: classes.inputInput,
                             }}
                             inputProps={{ 'aria-label': 'search' }}
+                            onChange={this.filterImg}
                         />
                     </div>
                 </header>
@@ -252,7 +337,7 @@ class Home extends Component {
                     <Button onClick={this.allImagesHandler}>Click Me</Button>
                 </div> */}
 
-                <div onLoad={this.allImagesHandler} className={classes.root1} id="cardDiv" >
+                <div className={classes.root1} id="cardDiv" >
 
                     {this.state.uploadedImages.map(img => (
                         <GridList cellHeight={500} className={classes.gridList}>
@@ -285,7 +370,7 @@ class Home extends Component {
                                         {
                                             img.like > 0 ?
                                                 <div>
-                                                    <IconButton aria-label="add to favorites" onClick={() => this.likeHandler(img)}><FavoriteIcon className={classes.favIcon} /></IconButton>
+                                                    <IconButton aria-label="add to favorites" onClick={() => this.unlikeHandler(img)}><FavoriteIcon className={classes.favIcon} /></IconButton>
                                                     <span> {img.like} Likes </span> </div> :
                                                 <div>
                                                     <IconButton aria-label="add to favorites" onClick={() => this.likeHandler(img)}><FavoriteBorderIcon /></IconButton>

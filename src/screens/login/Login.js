@@ -98,6 +98,7 @@ class Login extends Component {
             console.log("Valid");
             this.setState({ loginValidation: "dispNone" });
             this.setState({ loggedin: "true" });
+            sessionStorage.setItem("accessToken","IGQVJXQ2MyZAUNiWnhPX3VMYmduSDVudjU0MmdlYkROYWtJVHdxeWdheWN0dGdybm1weDJmRnczNzd3WUkxNVhwb1lPSTFpZAVBCM202aEVpUFY0alBOdGZAqX2hVcjVLakNuY0ptVHFSa2NUMERfM0k2SFJkM0FjQ0J3QlpB")
             this.props.history.push('/home');
         }
         else if (this.state.userName !== "" && this.state.password !== "") {

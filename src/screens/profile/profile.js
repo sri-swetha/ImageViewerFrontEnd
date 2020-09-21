@@ -29,12 +29,15 @@ import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import ProfileDetails from './ProfileDetails';
-import {Box, Modal, Backdrop, Fade } from '@material-ui/core';
+import { Box, Modal, Backdrop, Fade } from '@material-ui/core';
 import PostHeader from '../../common/post/PostHeader';
 import PostMedia from '../../common/post/PostMedia';
 import PostCaption from '../../common/post/PostCaption';
 import PostLikes from '../../common/post/PostLikes';
 import PostComments from '../../common/post/PostComments';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ProfileImage from '../../assets/profile-pic.jpg';
 const styles = theme => ({
 
     inputRoot: {
@@ -110,6 +113,19 @@ const styles = theme => ({
     },
     textLite: {
         fontWeight: 500
+    },
+    bg: {
+
+        backgroundColor: '#b3b3b3 !important',
+        color: 'black !important',
+        padding: '10px',
+        borderRadius: '10px',
+        height: '30px'
+    },
+    userAvatar: {
+        border: 0,
+        padding: 0,
+        margin: 0
     }
 
 
@@ -126,7 +142,8 @@ class Profile extends Component {
             commentGlobal: "",
             profileClick: 0,
             message: "",
-            img:{}
+            img: {},
+            anchorEl: null,
         }
         this.value = true;
         this.imageDetailHandler = this.imageDetailHandler.bind(this);
@@ -147,7 +164,7 @@ class Profile extends Component {
             }
         })
 
-        xhrimgUpcoming.open("GET", "https://graph.instagram.com/me/media?fields=id,caption&access_token=IGQVJXeU1WWVBTUXF1bFYwT29adGxJaVhrMXcwaE4zZAndQQzVVcWp6TmNpOUVpUW1WS1ZAUNk9nU2FqTWRIdGpzaV9DS1RyTXNDQ3FFQXl5NUtYZAmVwUEVLa1lsVmhSYkowd0FtTDIweDQ0SHMwWE85YjJWeVM4dUxuRThz");
+        xhrimgUpcoming.open("GET", this.props.baseUrl + "me/media?fields=id,caption&access_token=" + sessionStorage.getItem("accessToken"));
         xhrimgUpcoming.setRequestHeader("Cache-Control", "no-cache");
         xhrimgUpcoming.send(imgUpcoming);
     }
@@ -171,20 +188,20 @@ class Profile extends Component {
             xhrUpcoming.addEventListener("readystatechange", function () {
                 if (this.readyState === 4) {
                     that.setState({ uploadedImages: that.state.uploadedImages.concat(JSON.parse(this.responseText)) });
-                    that.setState({message: that.state.uploadedImages[0].username});
+                    that.setState({ message: that.state.uploadedImages[0].username });
                 }
             })
 
-            xhrUpcoming.open("GET", "https://graph.instagram.com/" + id + "?fields=id,media_type,media_url,username,timestamp&access_token=IGQVJXeU1WWVBTUXF1bFYwT29adGxJaVhrMXcwaE4zZAndQQzVVcWp6TmNpOUVpUW1WS1ZAUNk9nU2FqTWRIdGpzaV9DS1RyTXNDQ3FFQXl5NUtYZAmVwUEVLa1lsVmhSYkowd0FtTDIweDQ0SHMwWE85YjJWeVM4dUxuRThz");
+            xhrUpcoming.open("GET", this.props.baseUrl + id + "?fields=id,media_type,media_url,username,timestamp&access_token=" + sessionStorage.getItem("accessToken"));
             xhrUpcoming.setRequestHeader("Cache-Control", "no-cache");
             xhrUpcoming.send(dataUpcoming);
             console.log("Uploaded Images " + that.state.uploadedImages);
-    
+
         }
     }
 
     allImagesHandler = (event) => {
-        console.log("Message ",this.state.message);
+        console.log("Message ", this.state.message);
         let i = 0;
         let caption = "";
         let index = "";
@@ -213,22 +230,6 @@ class Profile extends Component {
         let newArray = [...this.state.uploadedImages];
         newArray[index] = { ...newArray[index], like: newArray[index].like + 1 };
         this.setState({ uploadedImages: newArray, })
-        /*         console.log("Image Obj ",img);
-                console.log("LikeImages ",this.state.likedImages);
-                let imgLike= this.state.likedImages[index].like;
-                let data = this.state.likedImages.filter((img) => {
-                    index=this.state.likedImages.findIndex((c) => (
-                        c.id === img.id
-                    ));
-                    imgLike= this.state.likedImages[index].like;
-                    imgLike+=1;
-                    img.like=imgLike;
-                    return imgLike;
-                }); 
-                this.setState({likedImages : data}); */
-        /*         console.log("Like ", this.state.likedImages); 
-                let currImg=this.state.likedImages[index];
-                this.setState({uploadedImages: this.state.likedImages}); */
     }
 
     onCommentChangeHandler = event => {
@@ -259,133 +260,105 @@ class Profile extends Component {
         this.setState({ open: false, img: {} });
     }
 
+    handleClick = (event) => {
+        this.setState({ anchorEl: event.currentTarget });
 
+    };
+
+    handleClose = () => {
+        this.setState({ anchorEl: null });
+    };
+
+    LogoutHandler = () => {
+        sessionStorage.clear();
+        this.props.history.push("/");
+    }
+    homePageHandler = () => {
+        this.props.history.push("/home");
+    }
 
     render() {
         const { classes } = this.props;
         return (
             <div>
                 <header className="header">
-                    Image Viewer
-                        <div className="profile">
-                        <Avatar src="https://i.pinimg.com/564x/09/5d/31/095d317d5d2d0918aacebc4537199233.jpg"
-                          />
+                    <span onClick={this.homePageHandler}>Image Viewer</span>
+                    <div className="profile">
+                        <IconButton className={classes.userAvatar} onClick={this.handleClick}>
+                            <Avatar alt="AS" src={ProfileImage} />
+                        </IconButton>
+
+                        <Menu
+                            className="simple-menu"
+                            elevation={0}
+                            getContentAnchorEl={null}
+                            anchorEl={this.state.anchorEl}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'center',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'center',
+                            }}
+
+                            keepMounted
+                            open={Boolean(this.state.anchorEl)}
+                            onClose={this.handleClose}>
+                            <div className={classes.bg}>
+
+                                <MenuItem onClose={this.handleClose} onClick={this.LogoutHandler}>
+                                    LogOut
+                                </MenuItem>
+                            </div>
+                        </Menu>
                     </div>
+
+
 
                 </header>
 
                 {
                     (this.state.uploadedImages.length > 0) ?
-                <div onLoad={this.allImagesHandler}>
-               
-                 <Box><ProfileDetails className="profile-detail" userName={this.state.message} numPosts={this.state.uploadedImages.length}
-                            fullName="Sri Swetha" follows={Math.round(500 + Math.random() * 500)}
-                            followers={Math.round(1000 + Math.random() * 1000)} />
-                            < Box className="image-grid">
-                                <GridList cellHeight={300} cols={3}>
-                                    {this.state.uploadedImages.map((img) => (
-                                        <GridListTile key={img.id} >
-                                            <img id={img.id} src={img.media_url} alt={img.id} onClick={this.openImgDetails} />
-                                        </GridListTile>
-                                    ))}
-                                </GridList>
-                            </Box>
-                
+                        <div onLoad={this.allImagesHandler}>
 
-                            <Modal className="modal" open={this.state.open}
-                                onClose={this.closePostDetails} closeAfterTransition BackdropComponent={Backdrop}>
-                                <Fade in={this.state.open}>
-                                    <Box width="60%" display="flex" flexDirection="row" justifyContent="space-evenly" className="modal-content">
-                                        <Box m="1%" width="50%" className="image-container" >
-                                            {(this.state.img.media_url) ? <PostMedia media={this.state.img.media_url} mediaId={this.state.img.id} minWidth="350px" minHeight="350px" /> : ""}
-                                        </Box>
-                                        <Box m="2%" width="50%" display="flex" flexDirection="column" justifyContent="left" alignItems="center">
-                                            <PostHeader postUser={this.state.img.username} postedTime={this.state.img.timestamp} />
-                                            <PostCaption mb="auto" caption={this.state.img.caption} hashtags={this.state.img.hashtags} />
-                                            <Box mt="auto" width="100%">
-                                                <PostComments postUser={this.state.img.username} >
-                                                    <PostLikes likes={this.state.img.like} />
-                                                </PostComments>
+                            <Box><ProfileDetails className="profile-detail" userName={this.state.message} numPosts={this.state.uploadedImages.length}
+                                fullName="Sri Swetha" follows={Math.round(500 + Math.random() * 500)}
+                                followers={Math.round(1000 + Math.random() * 1000)} />
+                                < Box className="image-grid">
+                                    <GridList cellHeight={300} cols={3}>
+                                        {this.state.uploadedImages.map((img) => (
+                                            <GridListTile key={img.id} >
+                                                <img id={img.id} src={img.media_url} alt={img.id} onClick={this.openImgDetails} />
+                                            </GridListTile>
+                                        ))}
+                                    </GridList>
+                                </Box>
+
+
+                                <Modal className="modal" open={this.state.open}
+                                    onClose={this.closePostDetails} closeAfterTransition BackdropComponent={Backdrop}>
+                                    <Fade in={this.state.open}>
+                                        <Box width="60%" display="flex" flexDirection="row" justifyContent="space-evenly" className="modal-content">
+                                            <Box m="1%" width="50%" className="image-container" >
+                                                {(this.state.img.media_url) ? <PostMedia media={this.state.img.media_url} mediaId={this.state.img.id} minWidth="350px" minHeight="350px" /> : ""}
+                                            </Box>
+                                            <Box m="2%" width="50%" display="flex" flexDirection="column" justifyContent="left" alignItems="center">
+                                                <PostHeader postUser={this.state.img.username} postedTime={this.state.img.timestamp} />
+                                                <PostCaption mb="auto" caption={this.state.img.caption} hashtags={this.state.img.hashtags} />
+                                                <Box mt="auto" width="100%">
+                                                    <PostComments postUser={this.state.img.username} >
+                                                        <PostLikes likes={this.state.img.like} />
+                                                    </PostComments>
+                                                </Box>
                                             </Box>
                                         </Box>
-                                    </Box>
-                                </Fade>
-                            </Modal>
-                    </Box>
+                                    </Fade>
+                                </Modal>
+                            </Box>
 
-                    </div> : ""
+                        </div> : ""
                 }
-
-
-
-
-
-
-                {/* <div onLoad={this.allImagesHandler} className={classes.root1} id="cardDiv" >
-
-                    {this.state.uploadedImages.map(img => (
-                        <GridList cellHeight={500} className={classes.gridList}>
-                            <GridListTile key={img.id} cols={2} >
-                                <Card key={img.id} variant="outlined">
-                                    <CardHeader
-                                        avatar={
-                                            <Avatar src="https://i.pinimg.com/564x/09/5d/31/095d317d5d2d0918aacebc4537199233.jpg" />
-
-                                        }
-
-                                        title={img.username}
-                                        subheader={moment(Date(img.timestamp)).format('L HH:mm:ss')}
-
-                                    />
-                                    <CardContent>
-                                        <CardMedia
-                                            className={classes.media}
-                                            image={img.media_url}
-                                            title={img.caption}
-                                        />
-                                        <Typography variant="body2" color="textPrimary" component="h1">
-                                            {img.caption}
-                                        </Typography>
-                                        <Typography variant="body2" color="primary" component="h2">
-                                            {img.hashtags}
-                                        </Typography>
-                                    </CardContent>
-                                    <CardActions disableSpacing>
-                                        {
-                                            img.like > 0 ?
-                                                <div>
-                                                    <IconButton aria-label="add to favorites" onClick={() => this.likeHandler(img)}><FavoriteIcon className={classes.favIcon} /></IconButton>
-                                                    <span> {img.like} Likes </span> </div> :
-                                                <div>
-                                                    <IconButton aria-label="add to favorites" onClick={() => this.likeHandler(img)}><FavoriteBorderIcon /></IconButton>
-                                                </div>
-                                        }
-                                    </CardActions>
-                                    <CardContent>
-                                        {
-                                            img.comment !== "" ?
-
-                                                <Typography variant="body2" color="textPrimary" component="h2" id="addcomment">
-                                                    <span id="username">{img.username} </span>:{img.comment}
-                                                </Typography> : img.comment
-
-                                        }
-                                        {
-                                            this.state.commentGlobal === "" ?
-                                                <TextField onChange={this.onCommentChangeHandler} className={classes.commentwidth} label="Add a Comment" placeholder="Add a Comment" value={this.state.commentGlobal} multiline />
-                                                :
-                                                <TextField onChange={this.onCommentChangeHandler} className={classes.commentwidth} label="Add a Comment" placeholder="Add a Comment" multiline />
-
-                                        }
-                                        <Button id="addbtn" onClick={() => this.commentHandler(img)} variant="contained" color="primary" >ADD</Button>
-                                    </CardContent>
-                                </Card>
-                            </GridListTile>
-                        </GridList>
-                    ))}
-                </div> */}
-
-
             </div>
         )
     }

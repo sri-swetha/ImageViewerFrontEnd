@@ -16,9 +16,7 @@
     font-weight: bold;
 }
 
-#gridList{
-    margin-bottom:10%;
-}
+
 ::-webkit-scrollbar {
     width: 4px;
   }
@@ -35,4 +33,7 @@
   
   ::-webkit-scrollbar-thumb:hover {
     background: grey;
+  }
+  .pointer{
+      cursor: pointer;
   }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, IconButton, Menu, MenuItem, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-
+import ProfileImage from '../../assets/profile-pic.jpg';
 const useStyles = makeStyles({
     userAvatar: {
         border: 0,
@@ -33,7 +33,7 @@ export default function ProfileIcon(props) {
                 if (props.type === "avatarWithMenu") {
                     return (<div>
                         <IconButton className={classes.userAvatar} onClick={handleOpen}>
-                            <Avatar alt="AS" src="https://i.pinimg.com/564x/09/5d/31/095d317d5d2d0918aacebc4537199233.jpg" />
+                            <Avatar alt="AS" src={ProfileImage} />
                         </IconButton>
                         <Menu id="profile-menu" anchorEl={anchor} keepMounted open={Boolean(anchor)}
                             onClose={handleClose}>
@@ -49,7 +49,7 @@ export default function ProfileIcon(props) {
                 } else {
                     return (
                         
-                            <Avatar alt="AS" src="https://i.pinimg.com/564x/09/5d/31/095d317d5d2d0918aacebc4537199233.jpg" />
+                            <Avatar alt="AS" src={ProfileImage} />
                     );
                 }
             })()
